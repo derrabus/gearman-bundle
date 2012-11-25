@@ -18,6 +18,7 @@ class Configuration implements ConfigurationInterface
         $root = $builder->root('gearman');
 
         $root->children()->arrayNode('servers')->prototype('scalar')->isRequired();
+        $root->children()->scalarNode('timeout')->defaultValue(-1);
 
         return $builder;
     }

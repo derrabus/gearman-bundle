@@ -2,6 +2,7 @@
 
 namespace Rabus\GearmanBundle\Tests\DependencyInjection;
 
+use GearmanClient, GearmanWorker;
 use PHPUnit_Framework_TestCase;
 
 use Rabus\GearmanBundle\DependencyInjection\GearmanExtension;
@@ -31,6 +32,8 @@ class GearmanExtensionTest extends PHPUnit_Framework_TestCase
 
         $worker = $this->container->get('gearman.worker');
         $this->assertInstanceOf('GearmanWorker', $worker);
+        /** @var GearmanWorker $worker */
+        $this->assertEquals(-1, $worker->timeout());
     }
 
     public function testSimpleClient()
@@ -41,8 +44,40 @@ class GearmanExtensionTest extends PHPUnit_Framework_TestCase
 
         $this->loadConfig($config);
 
-        $worker = $this->container->get('gearman.client');
-        $this->assertInstanceOf('GearmanClient', $worker);
+        $client = $this->container->get('gearman.client');
+        $this->assertInstanceOf('GearmanClient', $client);
+        /** @var GearmanClient $client */
+        $this->assertEquals(-1, $client->timeout());
+    }
+
+    public function testWorkerWithTimeout()
+    {
+        $config = array(
+            'servers' => array('localhost'),
+            'timeout' => 5000
+        );
+
+        $this->loadConfig($config);
+
+        $worker = $this->container->get('gearman.worker');
+        $this->assertInstanceOf('GearmanWorker', $worker);
+        /** @var GearmanWorker $worker */
+        $this->assertEquals(5000, $worker->timeout());
+    }
+
+    public function testClientWithTimeout()
+    {
+        $config = array(
+            'servers' => array('localhost'),
+            'timeout' => 5000
+        );
+
+        $this->loadConfig($config);
+
+        $client = $this->container->get('gearman.client');
+        $this->assertInstanceOf('GearmanClient', $client);
+        /** @var GearmanClient $client */
+        $this->assertEquals(5000, $client->timeout());
     }
 
     /**

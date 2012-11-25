@@ -19,15 +19,24 @@ class GearmanExtension extends ConfigurableExtension
         $workerDefinition = new Definition('GearmanWorker');
         $clientDefinition = new Definition('GearmanClient');
 
-        foreach ($mergedConfig['servers'] as $currentServer) {
-            $currentServer = explode(':', $currentServer, 2);
-            $workerDefinition->addMethodCall('addServer', $currentServer);
-            $clientDefinition->addMethodCall('addServer', $currentServer);
-        }
-
-        $workerDefinition->setScope('prototype');
+        $this->configureDefinition($workerDefinition, $mergedConfig);
+        $this->configureDefinition($clientDefinition, $mergedConfig);
 
         $container->setDefinition('gearman.worker', $workerDefinition);
         $container->setDefinition('gearman.client', $clientDefinition);
+    }
+
+    /**
+     * @param Definition $definition
+     * @param array $config
+     */
+    private function configureDefinition(Definition $definition, array $config)
+    {
+        foreach ($config['servers'] as $currentServer) {
+            $currentServer = explode(':', $currentServer, 2);
+            $definition->addMethodCall('addServer', $currentServer);
+        }
+        $definition->addMethodCall('setTimeout', array($config['timeout']));
+        $definition->setScope('prototype');
     }
 }
